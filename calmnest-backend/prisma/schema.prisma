@@ -1,0 +1,95 @@
+// schema.prisma
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String        @unique
+  password       String
+  gender         String
+  birthDate      DateTime
+  role           String
+  categories     Category[]    @relation("UserCategories")
+  articles       Article[]     @relation("UserArticles")
+  programs       Program[]     @relation("UserPrograms")
+  unitLearnings  UnitLearning[] @relation("UserUnitLearnings")
+  subscriptions  Subscription[] @relation("UserSubscriptions")
+  profile        Profile?      @relation("UserProfile")
+}
+
+model Profile {
+  id              Int      @id @default(autoincrement())
+  qualifications  Json
+  experience      Json
+  profilePicture  String?
+  bio             String?
+  user            User     @relation("UserProfile", fields: [userId], references: [id])
+  userId          Int      @unique
+}
+
+model Category {
+  id           Int          @id @default(autoincrement())
+  title        String
+  imageUrl     String? 
+  user         User?        @relation("UserCategories", fields: [userId], references: [id])
+  userId       Int?
+}
+
+model Article {
+  id           Int          @id @default(autoincrement())
+  image        String
+  content      String
+  title        String
+  creationDate DateTime
+  user         User?        @relation("UserArticles", fields: [userId], references: [id])
+  userId       Int?
+
+}
+
+model Program {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  creationDate DateTime
+  user         User?         @relation("UserPrograms", fields: [userId], references: [id])
+  userId       Int?
+  unitLearnings UnitLearning[] @relation("ProgramUnitLearnings")
+}
+
+model UnitLearning {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String
+  videoUrl     String
+  user         User?        @relation("UserUnitLearnings", fields: [userId], references: [id])
+  userId       Int?
+  program      Program?     @relation("ProgramUnitLearnings", fields: [programId], references: [id])
+  programId    Int?
+}
+
+model Subscription {
+  id           Int          @id @default(autoincrement())
+  startDate    DateTime
+  endDate      DateTime
+  price        Float
+  type         String
+  user         User?        @relation("UserSubscriptions", fields: [userId], references: [id])
+  userId       Int?
+}
+
+model Statistic {
+  id                 Int    @id @default(autoincrement())
+  numberOfUsers      Int
+  numberOfUnitLearnings Int
+  numberOfPrograms   Int
+  numberOfSubscriptions Int
+}
